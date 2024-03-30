@@ -1,19 +1,19 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/adriein/eb-guild-ops/internal/app_eb_guild_ops/repository"
+	"os"
 )
 
 func main() {
-	char, err := repository.Character("Marlock")
+	guild, err := repository.Guild("Elite BrotherHood")
 
 	if err != nil {
-		fmt.Println(err)
+		fmt.Printf("Received unexpected error:\n%+v\n", err)
+
+		os.Exit(1)
 	}
 
-	fmt.Printf("%#v\n", char)
-	a, err := json.Marshal(char)
-	fmt.Println(string(a))
+	fmt.Printf("%#v\n", guild)
 }
