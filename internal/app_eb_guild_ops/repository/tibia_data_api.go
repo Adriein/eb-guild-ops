@@ -185,7 +185,7 @@ func Guild(name string) (TibiaDataAPIGuild, error) {
 
 	guildHall := apiResponse.Guild.Guildhalls[0]
 
-	paidUntil, paidUntilParseError := time.Parse(time.RFC3339, guildHall.PaidUntil)
+	paidUntil, paidUntilParseError := time.Parse(time.DateOnly, guildHall.PaidUntil)
 
 	if paidUntilParseError != nil {
 		return TibiaDataAPIGuild{}, fmt.Errorf(
@@ -194,10 +194,10 @@ func Guild(name string) (TibiaDataAPIGuild, error) {
 		)
 	}
 
-	members := make([]Member, len(apiResponse.Guild.Members))
+	var members []Member
 
 	for _, member := range apiResponse.Guild.Members {
-		joined, joinedTimeParseError := time.Parse(time.RFC3339, member.Joined)
+		joined, joinedTimeParseError := time.Parse(time.DateOnly, member.Joined)
 
 		if joinedTimeParseError != nil {
 			return TibiaDataAPIGuild{}, fmt.Errorf(
