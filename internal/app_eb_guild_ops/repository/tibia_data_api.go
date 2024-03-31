@@ -87,7 +87,7 @@ const TIBIA_DATA_API_VERSION string = "v4"
 const TIBIA_DATA_API_CHARACTER_URL string = "character"
 const TIBIA_DATA_API_GUILD_URL string = "guild"
 
-// Character make a new request to TibiaAPI and returns a TibiaDataAPICharacter struct
+// Character make a new HTTP request to TibiaAPI and returns a TibiaDataAPICharacter struct
 func Character(name string) (TibiaDataAPICharacter, error) {
 	request, requestCreationError := http.NewRequest(
 		http.MethodGet,
@@ -143,6 +143,7 @@ func Character(name string) (TibiaDataAPICharacter, error) {
 	}, nil
 }
 
+// Guild make a new HTTP request to TibiaAPI and returns a TibiaDataAPIGuild struct
 func Guild(name string) (TibiaDataAPIGuild, error) {
 	request, requestCreationError := http.NewRequest(
 		http.MethodGet,

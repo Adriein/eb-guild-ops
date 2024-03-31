@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/adriein/eb-guild-ops/internal/app_eb_guild_ops/repository"
-	"log"
 	"os"
 )
 
@@ -18,8 +17,9 @@ func main() {
 	}
 
 	guildJSON, err := json.MarshalIndent(guild, "", "  ")
+
 	if err != nil {
-		log.Fatalf(err.Error())
+		fmt.Println(err.Error())
 	}
 	fmt.Printf("Guild %s\n", string(guildJSON))
 }
