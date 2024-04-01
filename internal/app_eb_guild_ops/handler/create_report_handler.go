@@ -11,7 +11,7 @@ type CreateReportCommandParameters struct {
 }
 
 type CreateReportCommand struct {
-	Repository repository.TibiaDataAPI
+	Repository repository.ITibiaDataAPI
 	Params     CreateReportCommandParameters
 }
 
@@ -24,7 +24,8 @@ type InactiveMember struct {
 type EbGuildReport struct {
 	Version                   string
 	InactiveMembers           []InactiveMember
-	GuildBalance              int
+	InactiveMembersNumber     int
+	MembersNumber             int
 	NextGuildHousePaymentDate string
 }
 
@@ -49,14 +50,26 @@ func Execute(command CreateReportCommand) (EbGuildReport, error) {
 
 		nano := time.Since(memberDetail.LastLogin)
 
-		days := math.RoundToEven(nano.Hours() * 24)
+		days := math.RoundToEven(nano.Hours() / 24)
 
 		if days >= 30 {
 			inactiveMembers = append(
 				inactiveMembers,
-				InactiveMember{memberDetail.Name, memberDetail.LastLogin, days},
+				InactiveMember{
+					memberDetail.Name,
+					memberDetail.LastLogin.Format("02-01-2006"),
+					days,
+				},
 			)
 		}
 
 	}
+
+	return EbGuildReport{
+		"1.0",
+		inactiveMembers,
+		len(inactiveMembers),
+		len(guild.Members),
+		guild.GuildHall.PaidUntil.Format("02-01-2006"),
+	}, nil
 }

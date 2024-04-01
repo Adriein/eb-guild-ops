@@ -34,10 +34,12 @@ type TibiaDataAPIGuild struct {
 	MembersTotal int
 }
 
-type TibiaDataAPI interface {
+type ITibiaDataAPI interface {
 	Character(name string) (TibiaDataAPICharacter, error)
 	Guild(name string) (TibiaDataAPIGuild, error)
 }
+
+type TibiaDataAPI struct{}
 
 type TibiaDataAPICharacterJSON struct {
 	Character struct {
@@ -88,7 +90,7 @@ const TIBIA_DATA_API_CHARACTER_URL string = "character"
 const TIBIA_DATA_API_GUILD_URL string = "guild"
 
 // Character make a new HTTP request to TibiaAPI and returns a TibiaDataAPICharacter struct
-func Character(name string) (TibiaDataAPICharacter, error) {
+func (api TibiaDataAPI) Character(name string) (TibiaDataAPICharacter, error) {
 	request, requestCreationError := http.NewRequest(
 		http.MethodGet,
 		fmt.Sprintf(
@@ -144,7 +146,7 @@ func Character(name string) (TibiaDataAPICharacter, error) {
 }
 
 // Guild make a new HTTP request to TibiaAPI and returns a TibiaDataAPIGuild struct
-func Guild(name string) (TibiaDataAPIGuild, error) {
+func (api TibiaDataAPI) Guild(name string) (TibiaDataAPIGuild, error) {
 	request, requestCreationError := http.NewRequest(
 		http.MethodGet,
 		fmt.Sprintf(

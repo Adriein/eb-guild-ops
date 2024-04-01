@@ -3,12 +3,16 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/adriein/eb-guild-ops/internal/app_eb_guild_ops/handler"
 	"github.com/adriein/eb-guild-ops/internal/app_eb_guild_ops/repository"
 	"os"
 )
 
 func main() {
-	guild, err := repository.Guild("Elite BrotherHood")
+	params := handler.CreateReportCommandParameters{GuildName: "Elite Brotherhood"}
+	command := handler.CreateReportCommand{Repository: repository.TibiaDataAPI{}, Params: params}
+
+	report, err := handler.Execute(command)
 
 	if err != nil {
 		fmt.Printf("Received unexpected error:\n%+v\n", err)
@@ -16,10 +20,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	guildJSON, err := json.MarshalIndent(guild, "", "  ")
+	reportJSON, err := json.MarshalIndent(report, "", "  ")
 
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	fmt.Printf("Guild %s\n", string(guildJSON))
+	fmt.Printf("Report %s\n", string(reportJSON))
 }
