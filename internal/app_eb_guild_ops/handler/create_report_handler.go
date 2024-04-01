@@ -6,13 +6,12 @@ import (
 	"time"
 )
 
-type CreateReportCommandParameters struct {
-	GuildName string
+type CreateReportHandler struct {
+	Api repository.ITibiaDataAPI
 }
 
 type CreateReportCommand struct {
-	Repository repository.ITibiaDataAPI
-	Params     CreateReportCommandParameters
+	GuildName string
 }
 
 type InactiveMember struct {
@@ -29,11 +28,14 @@ type EbGuildReport struct {
 	NextGuildHousePaymentDate string
 }
 
-func Execute(command CreateReportCommand) (EbGuildReport, error) {
-	var tibiaDataAPI = command.Repository
-	var guildName = command.Params.GuildName
+func NewCreateReportHandler(api repository.ITibiaDataAPI) (*CreateReportHandler, error) {
+	return &CreateReportHandler{api}, nil
+}
 
-	guild, guildError := tibiaDataAPI.Guild(guildName)
+func (handler *CreateReportHandler) Execute(command CreateReportCommand) (EbGuildReport, error) {
+	var guildName = command.GuildName
+
+	guild, guildError := handler.Api.Guild(guildName)
 
 	if guildError != nil {
 		return EbGuildReport{}, guildError
@@ -42,7 +44,7 @@ func Execute(command CreateReportCommand) (EbGuildReport, error) {
 	var inactiveMembers []InactiveMember
 
 	for _, member := range guild.Members {
-		memberDetail, characterError := tibiaDataAPI.Character(member.Name)
+		memberDetail, characterError := handler.Api.Character(member.Name)
 
 		if characterError != nil {
 			return EbGuildReport{}, characterError

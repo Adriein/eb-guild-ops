@@ -9,10 +9,24 @@ import (
 )
 
 func main() {
-	params := handler.CreateReportCommandParameters{GuildName: "Elite Brotherhood"}
-	command := handler.CreateReportCommand{Repository: repository.TibiaDataAPI{}, Params: params}
+	tibiaApiRepository, instantiateRepositoryError := repository.NewTibiaDataAPI()
 
-	report, err := handler.Execute(command)
+	if instantiateRepositoryError != nil {
+		fmt.Printf("Received unexpected error:\n%+v\n", instantiateRepositoryError)
+
+		os.Exit(1)
+	}
+
+	createReportHandler, instantiateHandlerError := handler.NewCreateReportHandler(tibiaApiRepository)
+
+	if instantiateHandlerError != nil {
+		fmt.Printf("Received unexpected error:\n%+v\n", instantiateHandlerError)
+
+		os.Exit(1)
+	}
+	command := handler.CreateReportCommand{GuildName: "Elite Brotherhood"}
+
+	report, err := createReportHandler.Execute(command)
 
 	if err != nil {
 		fmt.Printf("Received unexpected error:\n%+v\n", err)
