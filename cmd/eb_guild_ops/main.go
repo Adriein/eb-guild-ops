@@ -1,14 +1,33 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/adriein/eb-guild-ops/internal/app_eb_guild_ops/handler"
 	"github.com/adriein/eb-guild-ops/internal/app_eb_guild_ops/repository"
+	"github.com/joho/godotenv"
 	"os"
 )
 
 func main() {
+	dotenvError := godotenv.Load()
+
+	if dotenvError != nil {
+		fmt.Printf("Received unexpected error:\n%+v\n", dotenvError)
+		os.Exit(1)
+	}
+
+	/*report :=generateReport()
+
+	reportJSON, err := json.MarshalIndent(report, "", "  ")
+
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	fmt.Printf("Report %s\n", string(reportJSON))*/
+}
+
+func generateReport() handler.EbGuildReport {
 	tibiaApiRepository, instantiateRepositoryError := repository.NewTibiaDataAPI()
 
 	if instantiateRepositoryError != nil {
@@ -34,10 +53,5 @@ func main() {
 		os.Exit(1)
 	}
 
-	reportJSON, err := json.MarshalIndent(report, "", "  ")
-
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-	fmt.Printf("Report %s\n", string(reportJSON))
+	return report
 }
