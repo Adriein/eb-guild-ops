@@ -14,7 +14,7 @@ func main() {
 	dotenvError := godotenv.Load()
 
 	if dotenvError != nil {
-		fmt.Printf("Received unexpected error:\n%+v\n", dotenvError)
+		fmt.Printf("Received unexpected error:\n %+v\n", dotenvError)
 		os.Exit(1)
 	}
 
@@ -22,7 +22,7 @@ func main() {
 
 	if !hasEnvVar {
 		noEnvVarError := errors.New("ELITE_BROTHERHOOD_GUILD_ID is not set")
-		fmt.Printf("Received unexpected error:\n%+v\n", noEnvVarError)
+		fmt.Printf("Received unexpected error:\n %+v\n", noEnvVarError)
 
 		os.Exit(1)
 	}
@@ -30,15 +30,15 @@ func main() {
 	discord, instantiateDiscordError := repository.NewDiscordRepository()
 
 	if instantiateDiscordError != nil {
-		fmt.Printf("Received unexpected error:\n%+v\n", instantiateDiscordError)
+		fmt.Printf("Received unexpected error:\n %+v\n", instantiateDiscordError)
 
 		os.Exit(1)
 	}
 
-	response, fetchChannelError := discord.FetchChannel(ebGuildID, "")
+	response, fetchChannelError := discord.FetchChannel(ebGuildID, "bot-test")
 
 	if fetchChannelError != nil {
-		fmt.Printf("Received unexpected error:\n%+v\n", fetchChannelError)
+		fmt.Printf("Received unexpected error:\n %+v\n", fetchChannelError)
 
 		os.Exit(1)
 	}
