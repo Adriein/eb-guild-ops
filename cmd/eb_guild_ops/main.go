@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/adriein/eb-guild-ops/internal/app_eb_guild_ops/handler"
@@ -35,7 +34,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	response, fetchChannelError := discord.FetchChannel(ebGuildID, "bot-test")
+	_, fetchChannelError := discord.FetchChannel(ebGuildID, "bot-test")
 
 	if fetchChannelError != nil {
 		fmt.Printf("Received unexpected error:\n %+v\n", fetchChannelError)
@@ -43,15 +42,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	reportJSON, err := json.MarshalIndent(response, "", "  ")
-
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-
-	fmt.Printf("Report %s\n", string(reportJSON))
-
-	/*report :=generateReport()
+	/*report := generateReport()
 
 	reportJSON, err := json.MarshalIndent(report, "", "  ")
 

@@ -24,11 +24,16 @@ type FetchDiscordChannelResponse struct {
 	Name string
 }
 
+type SendMessageDiscordAPIBody struct {
+	Content string `json:"content"`
+}
+
 const DISCORD_BOT_TOKEN string = "DISCORD_BOT_TOKEN"
 const DISCORD_BASE_URL string = "https://discord.com/api"
 const DISCORD_API_VERSION string = "v10"
 const DISCORD_API_GUILDS_RESOURCES string = "guilds"
 const DISCORD_API_CHANNELS_RESOURCES string = "channels"
+const DISCORD_API_MESSAGES_RESOURCES string = "messages"
 
 func NewDiscordRepository() (*DiscordApi, error) {
 	token, isSet := os.LookupEnv(DISCORD_BOT_TOKEN)
@@ -118,14 +123,14 @@ func (discord *DiscordApi) FetchChannel(guildID string, name string) (FetchDisco
 
 func (discord *DiscordApi) Message(channelId string, message string) error {
 	request, requestCreationError := http.NewRequest(
-		http.MethodGet,
+		http.MethodPost,
 		fmt.Sprintf(
 			"%s/%s/%s/%s/%s",
 			discord.baseUrl,
 			discord.version,
-			DISCORD_API_GUILDS_RESOURCES,
-			guildID,
 			DISCORD_API_CHANNELS_RESOURCES,
+			channelId,
+			DISCORD_API_MESSAGES_RESOURCES,
 		),
 		nil,
 	)
