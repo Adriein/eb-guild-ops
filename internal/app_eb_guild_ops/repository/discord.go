@@ -9,22 +9,24 @@ import (
 	"os"
 )
 
-type DiscordRepository struct {
+type DiscordApi struct {
 	token   string
 	baseUrl string
 	version string
 }
 
-type DiscordGuildChannelsResponse struct {
+type DiscordGuildChannelsResponse []struct {
 	Id   string `json:"id"`
 	Name string `json:"name"`
 }
 
-const DISCORD_BOT_TOKEN = "DISCORD_BOT_TOKEN"
-const DISCORD_BASE_URL = "DISCORD_BOT_TOKEN"
-const DISCORD_API_VERSION = "DISCORD_BOT_TOKEN"
+const DISCORD_BOT_TOKEN string = "DISCORD_BOT_TOKEN"
+const DISCORD_BASE_URL string = "https://discord.com/api"
+const DISCORD_API_VERSION string = "v10"
+const DISCORD_API_GUILDS_RESOURCES string = "guilds"
+const DISCORD_API_CHANNELS_RESOURCES string = "channels"
 
-func New() (*DiscordRepository, error) {
+func NewDiscordRepository() (*DiscordApi, error) {
 	token, hasEnvVar := os.LookupEnv(DISCORD_BOT_TOKEN)
 
 	if !hasEnvVar {
@@ -33,50 +35,51 @@ func New() (*DiscordRepository, error) {
 
 	authorizationToken := fmt.Sprintf("Bot %s", token)
 
-	return &DiscordRepository{token: authorizationToken}, nil
+	return &DiscordApi{token: authorizationToken, baseUrl: DISCORD_BASE_URL, version: DISCORD_API_VERSION}, nil
 }
 
-func (discord *DiscordRepository) sendMessage(channelID string) error {
-	return nil
-}
-
-func (discord *DiscordRepository) fetchChannel(guildID string, name string) (DiscordGuildChannelsResponse, error) {
+func (discord *DiscordApi) FetchChannel(guildID string, name string) (DiscordGuildChannelsResponse, error) {
 	request, requestCreationError := http.NewRequest(
 		http.MethodGet,
 		fmt.Sprintf(
-			"%s/%s/%s/%s",
-			TIBIA_DATA_API_BASE_URL,
-			TIBIA_DATA_API_VERSION,
-			TIBIA_DATA_API_CHARACTER_URL,
-			name,
+			"%s/%s/%s/%s/%s",
+			discord.baseUrl,
+			discord.version,
+			DISCORD_API_GUILDS_RESOURCES,
+			guildID,
+			DISCORD_API_CHANNELS_RESOURCES,
 		),
 		nil,
 	)
 
+	request.Header.Set("Authorization", discord.token)
+
 	if requestCreationError != nil {
-		return TibiaDataAPICharacter{}, requestCreationError
+		return DiscordGuildChannelsResponse{}, requestCreationError
 	}
 
 	client := &http.Client{}
 	response, requestError := client.Do(request)
 
 	if requestError != nil {
-		return TibiaDataAPICharacter{}, requestError
+		return DiscordGuildChannelsResponse{}, requestError
 	}
 
 	defer response.Body.Close()
 
-	var apiResponse = TibiaDataAPICharacterJSON{}
+	var apiResponse = DiscordGuildChannelsResponse{}
 
 	byteRawResponse, readBodyError := io.ReadAll(response.Body)
 
 	if readBodyError != nil {
-		return TibiaDataAPICharacter{}, readBodyError
+		return DiscordGuildChannelsResponse{}, readBodyError
 	}
 
 	jsonUnmarshalError := json.Unmarshal(byteRawResponse, &apiResponse)
 
 	if jsonUnmarshalError != nil {
-		return TibiaDataAPICharacter{}, jsonUnmarshalError
+		return DiscordGuildChannelsResponse{}, jsonUnmarshalError
 	}
+
+	return apiResponse, nil
 }
