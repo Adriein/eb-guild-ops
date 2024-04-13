@@ -7,7 +7,7 @@
 </h1>
 
 <h4 align="center">A minimal Discord Bot to manage a Guild in MMOO called <a href="http://tibia.com" target="_blank">Tibia</a>.</h4>
-
+![screenshot](/public/demo.png)
 ## Key Features
 
 * Fetch specific Discord Guild Channel
