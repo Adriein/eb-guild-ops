@@ -3,7 +3,6 @@ package repository
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"time"
 )
@@ -84,10 +83,12 @@ type TibiaDataAPIGuildJSON struct {
 	} `json:"information"`
 }
 
-const TIBIA_DATA_API_BASE_URL string = "https://api.tibiadata.com"
-const TIBIA_DATA_API_VERSION string = "v4"
-const TIBIA_DATA_API_CHARACTER_URL string = "character"
-const TIBIA_DATA_API_GUILD_URL string = "guild"
+const (
+	TibiaDataApiBaseUrl      string = "https://api.tibiadata.com"
+	TibiaDataApiVersion      string = "v4"
+	TibiaDataApiCharacterUrl string = "character"
+	TibiaDataApiGuildUrl     string = "guild"
+)
 
 func NewTibiaDataAPI() (*TibiaDataAPI, error) {
 	return &TibiaDataAPI{}, nil
@@ -99,45 +100,57 @@ func (api *TibiaDataAPI) Character(name string) (TibiaDataAPICharacter, error) {
 		http.MethodGet,
 		fmt.Sprintf(
 			"%s/%s/%s/%s",
-			TIBIA_DATA_API_BASE_URL,
-			TIBIA_DATA_API_VERSION,
-			TIBIA_DATA_API_CHARACTER_URL,
+			TibiaDataApiBaseUrl,
+			TibiaDataApiVersion,
+			TibiaDataApiCharacterUrl,
 			name,
 		),
 		nil,
 	)
 
 	if requestCreationError != nil {
-		return TibiaDataAPICharacter{}, requestCreationError
+		err := fmt.Errorf(
+			"> Function: Character\n > Error: RequestCreationError -> %s\n",
+			requestCreationError.Error(),
+		)
+
+		return TibiaDataAPICharacter{}, err
 	}
 
 	client := &http.Client{}
 	response, requestError := client.Do(request)
 
 	if requestError != nil {
-		return TibiaDataAPICharacter{}, requestError
+		err := fmt.Errorf(
+			"> Function: Character\n > Error: RequestError -> %s\n",
+			requestError.Error(),
+		)
+
+		return TibiaDataAPICharacter{}, err
 	}
 
 	defer response.Body.Close()
 
 	var apiResponse = TibiaDataAPICharacterJSON{}
 
-	byteRawResponse, readBodyError := io.ReadAll(response.Body)
+	if decodeError := json.NewDecoder(response.Body).Decode(&apiResponse); decodeError != nil {
+		err := fmt.Errorf(
+			"> Function: Character\n > Error: DecodeError -> %s\n",
+			decodeError.Error(),
+		)
 
-	if readBodyError != nil {
-		return TibiaDataAPICharacter{}, readBodyError
-	}
-
-	jsonUnmarshalError := json.Unmarshal(byteRawResponse, &apiResponse)
-
-	if jsonUnmarshalError != nil {
-		return TibiaDataAPICharacter{}, jsonUnmarshalError
+		return TibiaDataAPICharacter{}, err
 	}
 
 	lastLogin, timeParseError := time.Parse(time.RFC3339, apiResponse.Character.Character.LastLogin)
 
 	if timeParseError != nil {
-		return TibiaDataAPICharacter{}, timeParseError
+		err := fmt.Errorf(
+			"> Function: Character\n > Error: TimeParseError -> %s\n",
+			timeParseError.Error(),
+		)
+
+		return TibiaDataAPICharacter{}, err
 	}
 
 	return TibiaDataAPICharacter{
@@ -155,39 +168,46 @@ func (api *TibiaDataAPI) Guild(name string) (TibiaDataAPIGuild, error) {
 		http.MethodGet,
 		fmt.Sprintf(
 			"%s/%s/%s/%s",
-			TIBIA_DATA_API_BASE_URL,
-			TIBIA_DATA_API_VERSION,
-			TIBIA_DATA_API_GUILD_URL,
+			TibiaDataApiBaseUrl,
+			TibiaDataApiVersion,
+			TibiaDataApiGuildUrl,
 			name,
 		),
 		nil,
 	)
 
 	if requestCreationError != nil {
-		return TibiaDataAPIGuild{}, requestCreationError
+		err := fmt.Errorf(
+			"> Function: Guild\n > Error: RequestCreationError -> %s\n",
+			requestCreationError.Error(),
+		)
+
+		return TibiaDataAPIGuild{}, err
 	}
 
 	client := &http.Client{}
 	response, requestError := client.Do(request)
 
 	if requestError != nil {
-		return TibiaDataAPIGuild{}, requestError
+		err := fmt.Errorf(
+			"> Function: Guild\n > Error: RequestError -> %s\n",
+			requestError.Error(),
+		)
+
+		return TibiaDataAPIGuild{}, err
 	}
 
 	defer response.Body.Close()
 
 	var apiResponse = TibiaDataAPIGuildJSON{}
 
-	byteRawResponse, readBodyError := io.ReadAll(response.Body)
+	if decodeError := json.NewDecoder(response.Body).Decode(&apiResponse); decodeError != nil {
+		err := fmt.Errorf(
+			"> Function: Guild\n > Error: DecodeError -> %s\n",
+			decodeError.Error(),
+		)
 
-	if readBodyError != nil {
-		return TibiaDataAPIGuild{}, readBodyError
-	}
-
-	jsonUnmarshalError := json.Unmarshal(byteRawResponse, &apiResponse)
-
-	if jsonUnmarshalError != nil {
-		return TibiaDataAPIGuild{}, jsonUnmarshalError
+		return TibiaDataAPIGuild{}, err
 	}
 
 	guildHall := apiResponse.Guild.Guildhalls[0]
@@ -195,10 +215,12 @@ func (api *TibiaDataAPI) Guild(name string) (TibiaDataAPIGuild, error) {
 	paidUntil, paidUntilParseError := time.Parse(time.DateOnly, guildHall.PaidUntil)
 
 	if paidUntilParseError != nil {
-		return TibiaDataAPIGuild{}, fmt.Errorf(
-			"paid until time parsing error with message: %s",
+		err := fmt.Errorf(
+			"> Function: Guild\n > Error: PaidUntilParseError -> %s\n",
 			paidUntilParseError.Error(),
 		)
+
+		return TibiaDataAPIGuild{}, err
 	}
 
 	var members []Member
@@ -207,10 +229,12 @@ func (api *TibiaDataAPI) Guild(name string) (TibiaDataAPIGuild, error) {
 		joined, joinedTimeParseError := time.Parse(time.DateOnly, member.Joined)
 
 		if joinedTimeParseError != nil {
-			return TibiaDataAPIGuild{}, fmt.Errorf(
-				"joined time parsing error with message: %s",
+			err := fmt.Errorf(
+				"> Function: Guild\n > Error: JoinedTimeParseError -> %s\n",
 				joinedTimeParseError.Error(),
 			)
+
+			return TibiaDataAPIGuild{}, err
 		}
 
 		members = append(members, Member{joined, member.Name, member.Rank, member.Status})
