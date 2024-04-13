@@ -3,9 +3,9 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/adriein/eb-guild-ops/internal/app_eb_guild_ops/handler"
-	"github.com/adriein/eb-guild-ops/internal/app_eb_guild_ops/markdown"
-	"github.com/adriein/eb-guild-ops/internal/app_eb_guild_ops/repository"
+	"github.com/adriein/eb-guild-ops/internal/app-eb-guild-ops/handler"
+	"github.com/adriein/eb-guild-ops/internal/app-eb-guild-ops/markdown"
+	"github.com/adriein/eb-guild-ops/internal/app-eb-guild-ops/repository"
 	"github.com/joho/godotenv"
 	"os"
 )

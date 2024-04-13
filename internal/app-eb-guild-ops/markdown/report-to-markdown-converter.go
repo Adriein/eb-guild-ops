@@ -2,7 +2,7 @@ package markdown
 
 import (
 	"fmt"
-	"github.com/adriein/eb-guild-ops/internal/app_eb_guild_ops/handler"
+	"github.com/adriein/eb-guild-ops/internal/app-eb-guild-ops/handler"
 	"strings"
 )
 

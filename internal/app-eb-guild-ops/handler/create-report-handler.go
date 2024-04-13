@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"github.com/adriein/eb-guild-ops/internal/app_eb_guild_ops/repository"
+	"github.com/adriein/eb-guild-ops/internal/app-eb-guild-ops/repository"
 	"math"
 	"time"
 )
