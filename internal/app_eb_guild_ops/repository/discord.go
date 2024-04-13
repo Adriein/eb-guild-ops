@@ -132,7 +132,7 @@ func (discord *DiscordApi) Message(channelId string, message string) error {
 
 	if requestCreationError != nil {
 		err := fmt.Errorf(
-			"> Function: FetchChannel\n > Error: RequestCreationError -> %s\n",
+			"> Function: Message\n > Error: RequestCreationError -> %s\n",
 			requestCreationError.Error(),
 		)
 
@@ -145,14 +145,14 @@ func (discord *DiscordApi) Message(channelId string, message string) error {
 	defer response.Body.Close()
 
 	if requestError != nil {
-		err := fmt.Errorf("> Function: FetchChannel\n > Error: RequestError -> %s\n", requestCreationError.Error())
+		err := fmt.Errorf("> Function: Message\n > Error: RequestError -> %s\n", requestCreationError.Error())
 
 		return err
 	}
 
 	if response.StatusCode != http.StatusOK {
 		err := fmt.Errorf(
-			"> Function: FetchChannel\n > Error: RequestError -> Discord API responded with http code: %d\n",
+			"> Function: Message\n > Error: RequestError -> Discord API responded with http code: %d\n",
 			response.StatusCode,
 		)
 
