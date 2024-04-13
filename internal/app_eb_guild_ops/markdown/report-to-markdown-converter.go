@@ -3,16 +3,32 @@ package markdown
 import (
 	"fmt"
 	"github.com/adriein/eb-guild-ops/internal/app_eb_guild_ops/handler"
+	"strings"
 )
 
-type MarkdownConverter struct{}
+type Converter struct{}
 
-func NewMarkdownConverter() (*MarkdownConverter, error) {
-	return &MarkdownConverter{}, nil
+func NewMarkdownConverter() (*Converter, error) {
+	return &Converter{}, nil
 }
 
-func (converter *MarkdownConverter) convertReport(report handler.EbGuildReport) (string, error) {
-	markdown := fmt.Sprintf("# Marlock Police State\n### Inactive Members:\n* Elite Fordrin, 315 days (29-05-2023)\n* Ame Damnee, 69 days (30-01-2024)")
+func (converter *Converter) ConvertReport(report handler.EbGuildReport) (string, error) {
+	var reportElements []string
+
+	reportElements = append(reportElements, "# Marlock Police State", "### Inactive Members:")
+
+	for _, inactiveMember := range report.InactiveMembers {
+		reportLine := fmt.Sprintf(
+			"* %s, %g days (%s)",
+			inactiveMember.Name,
+			inactiveMember.DaysElapsed,
+			inactiveMember.LastLoginDate,
+		)
+
+		reportElements = append(reportElements, reportLine)
+	}
+
+	markdown := fmt.Sprintf(strings.Join(reportElements, "\n"))
 
 	return markdown, nil
 }

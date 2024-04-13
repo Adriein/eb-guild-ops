@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -18,7 +19,7 @@ type DiscordGuildChannelsAPIResponse []struct {
 	Name string `json:"name"`
 }
 
-type FetchDiscordChannelResponse struct {
+type DiscordChannel struct {
 	Id   string
 	Name string
 }
@@ -48,7 +49,7 @@ func NewDiscordRepository() (*DiscordApi, error) {
 	return &DiscordApi{token: authorizationToken, baseUrl: DiscordBaseUrl, version: DiscordApiVersion}, nil
 }
 
-func (discord *DiscordApi) FetchChannel(guildID string, name string) (FetchDiscordChannelResponse, error) {
+func (discord *DiscordApi) FetchChannel(guildID string, name string) (DiscordChannel, error) {
 	request, requestCreationError := http.NewRequest(
 		http.MethodGet,
 		fmt.Sprintf(
@@ -70,7 +71,7 @@ func (discord *DiscordApi) FetchChannel(guildID string, name string) (FetchDisco
 			requestCreationError.Error(),
 		)
 
-		return FetchDiscordChannelResponse{}, err
+		return DiscordChannel{}, err
 	}
 
 	client := &http.Client{}
@@ -81,7 +82,7 @@ func (discord *DiscordApi) FetchChannel(guildID string, name string) (FetchDisco
 	if requestError != nil {
 		err := fmt.Errorf("> Function: FetchChannel\n > Error: RequestError -> %s\n", requestCreationError.Error())
 
-		return FetchDiscordChannelResponse{}, err
+		return DiscordChannel{}, err
 	}
 
 	if response.StatusCode != http.StatusOK {
@@ -90,7 +91,7 @@ func (discord *DiscordApi) FetchChannel(guildID string, name string) (FetchDisco
 			response.StatusCode,
 		)
 
-		return FetchDiscordChannelResponse{}, err
+		return DiscordChannel{}, err
 	}
 
 	var apiResponse = DiscordGuildChannelsAPIResponse{}
@@ -98,18 +99,18 @@ func (discord *DiscordApi) FetchChannel(guildID string, name string) (FetchDisco
 	if decodeError := json.NewDecoder(response.Body).Decode(&apiResponse); decodeError != nil {
 		err := fmt.Errorf("> Function: FetchChannel\n > Error: DecodeBodyError -> %s\n", decodeError.Error())
 
-		return FetchDiscordChannelResponse{}, err
+		return DiscordChannel{}, err
 	}
 
 	for _, channel := range apiResponse {
 		if channel.Name == name {
-			return FetchDiscordChannelResponse{channel.Id, channel.Name}, nil
+			return DiscordChannel{channel.Id, channel.Name}, nil
 		}
 	}
 
 	err := fmt.Errorf("> Function: FetchChannel\n > Error: Channel with name %s not found\n", name)
 
-	return FetchDiscordChannelResponse{}, err
+	return DiscordChannel{}, err
 }
 
 func (discord *DiscordApi) Message(channelId string, message string) error {
@@ -123,10 +124,11 @@ func (discord *DiscordApi) Message(channelId string, message string) error {
 			channelId,
 			DiscordApiMessagesResources,
 		),
-		nil,
+		bytes.NewBuffer([]byte(message)),
 	)
 
 	request.Header.Set("Authorization", discord.token)
+	request.Header.Add("Content-Type", "application/json")
 
 	if requestCreationError != nil {
 		err := fmt.Errorf(

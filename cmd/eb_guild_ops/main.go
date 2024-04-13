@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/adriein/eb-guild-ops/internal/app_eb_guild_ops/handler"
+	"github.com/adriein/eb-guild-ops/internal/app_eb_guild_ops/markdown"
 	"github.com/adriein/eb-guild-ops/internal/app_eb_guild_ops/repository"
 	"github.com/joho/godotenv"
 	"os"
@@ -34,7 +35,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	_, fetchChannelError := discord.FetchChannel(ebGuildID, "bot-test")
+	channel, fetchChannelError := discord.FetchChannel(ebGuildID, "bot-test")
 
 	if fetchChannelError != nil {
 		fmt.Printf("Received unexpected error:\n %+v\n", fetchChannelError)
@@ -42,9 +43,31 @@ func main() {
 		os.Exit(1)
 	}
 
-	/*report := generateReport()
+	report := generateReport()
 
-	reportJSON, err := json.MarshalIndent(report, "", "  ")
+	converter, instantiateConverterError := markdown.NewMarkdownConverter()
+
+	if instantiateConverterError != nil {
+		fmt.Printf("Received unexpected error:\n %+v\n", instantiateDiscordError)
+
+		os.Exit(1)
+	}
+
+	markdownReport, converterError := converter.ConvertReport(report)
+
+	if converterError != nil {
+		fmt.Printf("Received unexpected error:\n %+v\n", instantiateDiscordError)
+
+		os.Exit(1)
+	}
+
+	if sendMessageError := discord.Message(channel.Id, markdownReport); sendMessageError != nil {
+		fmt.Printf("Received unexpected error:\n %+v\n", sendMessageError)
+
+		os.Exit(1)
+	}
+
+	/*reportJSON, err := json.MarshalIndent(report, "", "  ")
 
 	if err != nil {
 		fmt.Println(err.Error())
