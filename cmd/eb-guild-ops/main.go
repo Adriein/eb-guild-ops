@@ -11,70 +11,24 @@ import (
 )
 
 func main() {
-	dotenvError := godotenv.Load()
+	discord := getDiscordApi()
 
-	if dotenvError != nil {
-		fmt.Printf("Received unexpected error:\n %+v\n", dotenvError)
-		os.Exit(1)
-	}
+	guildID, existEnv := os.LookupEnv("ELITE_BROTHERHOOD_GUILD_ID")
 
-	ebGuildID, hasEnvVar := os.LookupEnv("ELITE_BROTHERHOOD_GUILD_ID")
-
-	if !hasEnvVar {
+	if !existEnv {
 		noEnvVarError := errors.New("ELITE_BROTHERHOOD_GUILD_ID is not set")
 		fmt.Printf("Received unexpected error:\n %+v\n", noEnvVarError)
 
 		os.Exit(1)
 	}
 
-	discord, instantiateDiscordError := repository.NewDiscordRepository()
-
-	if instantiateDiscordError != nil {
-		fmt.Printf("Received unexpected error:\n %+v\n", instantiateDiscordError)
-
-		os.Exit(1)
-	}
-
-	channel, fetchChannelError := discord.FetchChannel(ebGuildID, "inactive-members-bot")
-
-	if fetchChannelError != nil {
-		fmt.Printf("Received unexpected error:\n %+v\n", fetchChannelError)
-
-		os.Exit(1)
-	}
+	channel := fetchGuildChannel(guildID, discord)
 
 	report := generateReport()
 
-	converter, instantiateConverterError := markdown.NewMarkdownConverter()
+	markdownReport := generateMarkdownReport(report)
 
-	if instantiateConverterError != nil {
-		fmt.Printf("Received unexpected error:\n %+v\n", instantiateDiscordError)
-
-		os.Exit(1)
-	}
-
-	markdownReport, converterError := converter.ConvertReport(report)
-
-	if converterError != nil {
-		fmt.Printf("Received unexpected error:\n %+v\n", instantiateDiscordError)
-
-		os.Exit(1)
-	}
-
-	if sendMessageError := discord.Message(channel.Id, markdownReport); sendMessageError != nil {
-		fmt.Printf("Received unexpected error:\n %+v\n", sendMessageError)
-
-		os.Exit(1)
-	}
-
-	/*reportJSON, err := json.MarshalIndent(report, "", "  ")
-
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-
-	fmt.Printf("Report %s\n", string(reportJSON))*/
-
+	sendReport(channel, markdownReport, discord)
 }
 
 func generateReport() handler.EbGuildReport {
@@ -104,4 +58,63 @@ func generateReport() handler.EbGuildReport {
 	}
 
 	return report
+}
+
+func fetchGuildChannel(guildID string, discord *repository.DiscordApi) repository.DiscordChannel {
+	channel, fetchChannelError := discord.FetchChannel(guildID, "inactive-members-bot")
+
+	if fetchChannelError != nil {
+		fmt.Printf("Received unexpected error:\n %+v\n", fetchChannelError)
+
+		os.Exit(1)
+	}
+
+	return channel
+}
+
+func getDiscordApi() *repository.DiscordApi {
+	dotenvError := godotenv.Load()
+
+	if dotenvError != nil {
+		fmt.Printf("Received unexpected error:\n %+v\n", dotenvError)
+		os.Exit(1)
+	}
+
+	discord, instantiateDiscordError := repository.NewDiscordRepository()
+
+	if instantiateDiscordError != nil {
+		fmt.Printf("Received unexpected error:\n %+v\n", instantiateDiscordError)
+
+		os.Exit(1)
+	}
+
+	return discord
+}
+
+func generateMarkdownReport(report handler.EbGuildReport) string {
+	converter, instantiateConverterError := markdown.NewMarkdownConverter()
+
+	if instantiateConverterError != nil {
+		fmt.Printf("Received unexpected error:\n %+v\n", instantiateConverterError)
+
+		os.Exit(1)
+	}
+
+	markdownReport, converterError := converter.ConvertReport(report)
+
+	if converterError != nil {
+		fmt.Printf("Received unexpected error:\n %+v\n", converterError)
+
+		os.Exit(1)
+	}
+
+	return markdownReport
+}
+
+func sendReport(channel repository.DiscordChannel, report string, discord *repository.DiscordApi) {
+	if sendMessageError := discord.Message(channel.Id, report); sendMessageError != nil {
+		fmt.Printf("Received unexpected error:\n %+v\n", sendMessageError)
+
+		os.Exit(1)
+	}
 }
