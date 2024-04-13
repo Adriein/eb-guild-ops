@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-  <img src="https://https://github.com/Adriein/eb-guild-ops/blob/master/public/ebps-logo.jpg" alt="EBPS" width="200">
+  <img src="https://https://github.com/Adriein/eb-guild-ops/blob/master/public/ebps-logo.jpg?raw=true" alt="EBPS" width="200">
   <br>
   Go Guild Operations Management
   <br>
