@@ -35,7 +35,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	channel, fetchChannelError := discord.FetchChannel(ebGuildID, "bot-test")
+	channel, fetchChannelError := discord.FetchChannel(ebGuildID, "inactive-members-bot")
 
 	if fetchChannelError != nil {
 		fmt.Printf("Received unexpected error:\n %+v\n", fetchChannelError)

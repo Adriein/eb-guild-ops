@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 )
 
 type DiscordApi struct {
@@ -103,7 +104,7 @@ func (discord *DiscordApi) FetchChannel(guildID string, name string) (DiscordCha
 	}
 
 	for _, channel := range apiResponse {
-		if channel.Name == name {
+		if strings.Contains(channel.Name, name) {
 			return DiscordChannel{channel.Id, channel.Name}, nil
 		}
 	}
