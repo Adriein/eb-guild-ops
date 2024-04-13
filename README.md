@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-  <img src="https://raw.githubusercontent.com/amitmerchant1990/electron-markdownify/master/app/img/markdownify.png" alt="EBPS" width="200">
+  <img src="https://https://github.com/Adriein/eb-guild-ops/blob/master/public/ebps-logo.jpg" alt="EBPS" width="200">
   <br>
   Go Guild Operations Management
   <br>
