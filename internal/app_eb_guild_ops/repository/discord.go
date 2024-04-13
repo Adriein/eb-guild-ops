@@ -3,7 +3,6 @@ package repository
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 )
@@ -28,15 +27,17 @@ type SendMessageDiscordAPIBody struct {
 	Content string `json:"content"`
 }
 
-const DISCORD_BOT_TOKEN string = "DISCORD_BOT_TOKEN"
-const DISCORD_BASE_URL string = "https://discord.com/api"
-const DISCORD_API_VERSION string = "v10"
-const DISCORD_API_GUILDS_RESOURCES string = "guilds"
-const DISCORD_API_CHANNELS_RESOURCES string = "channels"
-const DISCORD_API_MESSAGES_RESOURCES string = "messages"
+const (
+	DiscordBotToken             string = "DISCORD_BOT_TOKEN"
+	DiscordBaseUrl              string = "https://discord.com/api"
+	DiscordApiVersion           string = "v10"
+	DiscordApiGuildsResources   string = "guilds"
+	DiscordApiChannelsResources string = "channels"
+	DiscordApiMessagesResources string = "messages"
+)
 
 func NewDiscordRepository() (*DiscordApi, error) {
-	token, isSet := os.LookupEnv(DISCORD_BOT_TOKEN)
+	token, isSet := os.LookupEnv(DiscordBotToken)
 
 	if !isSet {
 		return nil, fmt.Errorf("> Function: NewDiscordRepository\n > Error: DISCORD_BOT_TOKEN is not set\n")
@@ -44,7 +45,7 @@ func NewDiscordRepository() (*DiscordApi, error) {
 
 	authorizationToken := fmt.Sprintf("Bot %s", token)
 
-	return &DiscordApi{token: authorizationToken, baseUrl: DISCORD_BASE_URL, version: DISCORD_API_VERSION}, nil
+	return &DiscordApi{token: authorizationToken, baseUrl: DiscordBaseUrl, version: DiscordApiVersion}, nil
 }
 
 func (discord *DiscordApi) FetchChannel(guildID string, name string) (FetchDiscordChannelResponse, error) {
@@ -54,9 +55,9 @@ func (discord *DiscordApi) FetchChannel(guildID string, name string) (FetchDisco
 			"%s/%s/%s/%s/%s",
 			discord.baseUrl,
 			discord.version,
-			DISCORD_API_GUILDS_RESOURCES,
+			DiscordApiGuildsResources,
 			guildID,
-			DISCORD_API_CHANNELS_RESOURCES,
+			DiscordApiChannelsResources,
 		),
 		nil,
 	)
@@ -94,18 +95,8 @@ func (discord *DiscordApi) FetchChannel(guildID string, name string) (FetchDisco
 
 	var apiResponse = DiscordGuildChannelsAPIResponse{}
 
-	byteRawResponse, readBodyError := io.ReadAll(response.Body)
-
-	if readBodyError != nil {
-		err := fmt.Errorf("> Function: FetchChannel\n > Error: ReadBodyError -> %s\n", readBodyError.Error())
-
-		return FetchDiscordChannelResponse{}, err
-	}
-
-	jsonUnmarshalError := json.Unmarshal(byteRawResponse, &apiResponse)
-
-	if jsonUnmarshalError != nil {
-		err := fmt.Errorf("> Function: FetchChannel\n > Error: JsonUnmarshalError -> %s\n", jsonUnmarshalError.Error())
+	if decodeError := json.NewDecoder(response.Body).Decode(&apiResponse); decodeError != nil {
+		err := fmt.Errorf("> Function: FetchChannel\n > Error: DecodeBodyError -> %s\n", decodeError.Error())
 
 		return FetchDiscordChannelResponse{}, err
 	}
@@ -128,9 +119,9 @@ func (discord *DiscordApi) Message(channelId string, message string) error {
 			"%s/%s/%s/%s/%s",
 			discord.baseUrl,
 			discord.version,
-			DISCORD_API_CHANNELS_RESOURCES,
+			DiscordApiChannelsResources,
 			channelId,
-			DISCORD_API_MESSAGES_RESOURCES,
+			DiscordApiMessagesResources,
 		),
 		nil,
 	)
