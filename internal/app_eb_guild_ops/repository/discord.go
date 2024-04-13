@@ -24,7 +24,7 @@ type DiscordChannel struct {
 	Name string
 }
 
-type SendMessageDiscordAPIBody struct {
+type MessageDiscordAPIBody struct {
 	Content string `json:"content"`
 }
 
@@ -114,6 +114,19 @@ func (discord *DiscordApi) FetchChannel(guildID string, name string) (DiscordCha
 }
 
 func (discord *DiscordApi) Message(channelId string, message string) error {
+	body := MessageDiscordAPIBody{Content: message}
+
+	byteEncodedBody, jsonEncodeError := json.Marshal(body)
+
+	if jsonEncodeError != nil {
+		err := fmt.Errorf(
+			"> Function: Message\n > Error: JsonEncodeError -> %s\n",
+			jsonEncodeError.Error(),
+		)
+
+		return err
+	}
+
 	request, requestCreationError := http.NewRequest(
 		http.MethodPost,
 		fmt.Sprintf(
@@ -124,7 +137,7 @@ func (discord *DiscordApi) Message(channelId string, message string) error {
 			channelId,
 			DiscordApiMessagesResources,
 		),
-		bytes.NewBuffer([]byte(message)),
+		bytes.NewBuffer(byteEncodedBody),
 	)
 
 	request.Header.Set("Authorization", discord.token)
