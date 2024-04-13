@@ -15,11 +15,11 @@ func NewMarkdownConverter() (*Converter, error) {
 func (converter *Converter) ConvertReport(report handler.EbGuildReport) (string, error) {
 	var reportElements []string
 
-	reportElements = append(reportElements, "# Marlock Police State", "### Inactive Members:")
+	reportElements = append(reportElements, "# Marlock Police State", "## Inactive Members:")
 
 	for _, inactiveMember := range report.InactiveMembers {
 		reportLine := fmt.Sprintf(
-			"* %s, %g days (%s)",
+			"* **%s**, %g days (%s)",
 			inactiveMember.Name,
 			inactiveMember.DaysElapsed,
 			inactiveMember.LastLoginDate,
@@ -27,6 +27,9 @@ func (converter *Converter) ConvertReport(report handler.EbGuildReport) (string,
 
 		reportElements = append(reportElements, reportLine)
 	}
+
+	reportElements = append(reportElements, fmt.Sprintf("### Total Inactive Members: %d", report.InactiveMembersNumber))
+	reportElements = append(reportElements, fmt.Sprintf("### Total Guild Members: %d", report.MembersNumber))
 
 	markdown := fmt.Sprintf(strings.Join(reportElements, "\n"))
 
